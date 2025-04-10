@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="FxHive Test Suite">
+  <test name="FxHive Admin Tests">
+    <classes>
+      <class name="Admin.LoginTest"/>
+      <class name="Admin.BaseTest"/> <!-- Only if needed -->
+      <class name="Admin.AddEmployeeTest"/>
+    </classes>
+  </test>
+</suite>
