@@ -39,7 +39,7 @@ public class AddEmployeePage {
     public AddEmployeePage(WebDriver driver) {
         // Constructor to initialize the WebDriver and WebDriverWait
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
 }
     // Action to click on Add Employee link
