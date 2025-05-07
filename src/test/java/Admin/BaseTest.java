@@ -17,7 +17,7 @@ import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import java.time.Duration;
 
 public class BaseTest {
-     protected WebDriver driver;
+    protected WebDriver driver;
     protected ExtentReports extent;
     protected ExtentTest parentTest;
     protected ExtentTest loginTest;
@@ -38,7 +38,7 @@ public class BaseTest {
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
-        driver.get("https://stage.fxhive.site/");
+        driver.get("httpS://stage.fxhive.site/");
         loginTest.log(Status.INFO, "Navigated to login page");
     }
 
@@ -57,7 +57,8 @@ public class BaseTest {
             // Wait until the username input field is visible
             WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")));
             WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("form button[type='submit']")));
+            WebElement loginButton = wait
+                    .until(ExpectedConditions.elementToBeClickable(By.cssSelector("form button[type='submit']")));
 
             // Enter login credentials
             usernameField.sendKeys(email);
@@ -69,7 +70,8 @@ public class BaseTest {
 
             loginTest.log(Status.PASS, "Login successful, redirected to dashboard");
         } catch (TimeoutException te) {
-            loginTest.log(Status.FAIL, "Login failed: Element not found or page did not load in time - " + te.getMessage());
+            loginTest.log(Status.FAIL,
+                    "Login failed: Element not found or page did not load in time - " + te.getMessage());
             throw new RuntimeException("Login failed: Element not found or timeout - " + te.getMessage());
         } catch (Exception e) {
             loginTest.log(Status.FAIL, "Login failed: " + e.getMessage());
