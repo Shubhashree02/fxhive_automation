@@ -4,5 +4,5 @@
 pom.xml
 target
 test-output/
-.screenshots
+screenshots
 .settings/

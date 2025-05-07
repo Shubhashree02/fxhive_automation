@@ -47,7 +47,8 @@ public class LoginTest {
         test.log(Status.INFO, "Starting valid login test");
         driver.findElement(By.id("username")).sendKeys("admin@fx31labs.com");
         driver.findElement(By.id("password")).sendKeys("admin@123");
-        driver.findElement(By.tagName("button")).click();
+        driver.findElement(By.xpath("//button[text()='Login']")).click();
+
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         wait.until(ExpectedConditions.urlContains("admin_dashboard.html"));
@@ -61,7 +62,8 @@ public class LoginTest {
         test.log(Status.INFO, "Testing invalid username");
         driver.findElement(By.id("username")).sendKeys("admin@m");
         driver.findElement(By.id("password")).sendKeys("admin@123");
-        driver.findElement(By.tagName("button")).click();
+        driver.findElement(By.xpath("//button[text()='Login']")).click();
+
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         WebElement errorMsg = wait.until(driver -> {
@@ -82,7 +84,8 @@ public class LoginTest {
         test.log(Status.INFO, "Testing invalid password");
         driver.findElement(By.id("username")).sendKeys("admin@fx31labs.com");
         driver.findElement(By.id("password")).sendKeys("wrongpass");
-        driver.findElement(By.tagName("button")).click();
+        driver.findElement(By.xpath("//button[text()='Login']")).click();
+
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         WebElement errorMsg = wait.until(driver -> {
@@ -105,7 +108,8 @@ public class LoginTest {
         WebElement passwordField = driver.findElement(By.id("password"));
         usernameField.clear();
         passwordField.clear();
-        driver.findElement(By.tagName("button")).click();
+        driver.findElement(By.xpath("//button[text()='Login']")).click();
+
 
         Assert.assertEquals(usernameField.getAttribute("validationMessage"), "Please fill out this field.");
         test.log(Status.PASS, "Validation message shown for blank fields");
