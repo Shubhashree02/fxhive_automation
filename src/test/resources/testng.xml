@@ -5,8 +5,9 @@
         <classes>
             <!-- <class name="Admin.LoginTest"/> -->
             <!-- <class name="Admin.BaseTest"/> Only if needed -->
-            <class name="Admin.AddEmployeeTest"/>
+            <!-- <class name="Admin.AddEmployeeTest"/> -->
             <!-- <class name="Admin.AllEmployeeTest"/> Added AllEmployeeTest -->
+            <class name="Admin.AddSalaryFullTimeTest"/>
         </classes>
     </test>
     <!-- <test name="Salary Structure Tests - Full Time">
