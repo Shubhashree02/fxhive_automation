@@ -38,7 +38,7 @@ public class BaseTest {
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
-        driver.get("httpS://stage.fxhive.site/");
+        driver.get("http://dev.fxhive.site/");
         loginTest.log(Status.INFO, "Navigated to login page");
     }
 
