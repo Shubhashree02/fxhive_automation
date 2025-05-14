@@ -8,6 +8,7 @@
             <!-- <class name="Admin.AddEmployeeTest"/> -->
             <!-- <class name="Admin.AllEmployeeTest"/> Added AllEmployeeTest -->
             <class name="Admin.AddSalaryFullTimeTest"/>
+            <class name="Admin.AddSalaryInternTest"/>
         </classes>
     </test>
     <!-- <test name="Salary Structure Tests - Full Time">
