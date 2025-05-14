@@ -7,7 +7,6 @@ import AdminPage.AddEmployeePage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Random;
 
 import com.github.javafaker.Faker; // <-- Add this import
 
@@ -87,7 +86,7 @@ public class AddEmployeeTest extends BaseTest {
             addEmployeeTest.log(Status.INFO, "Success notification message: " + notificationMessage);
 
             Assert.assertTrue(
-                notificationMessage != null && notificationMessage.toLowerCase().contains("employee created"),
+                messageAppeared && notificationMessage.toLowerCase().contains("employee created"),
                 "Expected success message not found. Actual: '" + notificationMessage + "'"
             );
 
