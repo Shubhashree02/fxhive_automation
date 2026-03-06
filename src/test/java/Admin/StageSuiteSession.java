@@ -93,7 +93,10 @@ public class StageSuiteSession {
 
     @AfterSuite(alwaysRun = true)
     public void afterSuite() {
-        // Browser is left open (driver.quit() not called) so you can inspect the dashboard
+        if (driver != null) {
+            driver.quit();
+            driver = null;
+        }
         if (extent != null) {
             extent.flush();
         }
