@@ -19,22 +19,22 @@ public class AddEmployeePage {
     // Locators for form elements
     private By addEmployeeLink = By.cssSelector("a[data-content='addEmployee']");
     private By addEmployeeForm = By.id("addEmployeeForm");
-    private By firstNameField = By.id("firstName");
-    private By lastNameField = By.id("lastName");
-    private By designationField = By.id("designation");
-    private By departmentField = By.id("department");
-    private By employeeTypeDropdown = By.id("employeeType");
-    private By contactField = By.id("contact");
-    private By emailField = By.id("email");
-    private By dateOfJoiningField = By.id("dateOfJoining");
-    private By dobField = By.id("dob");
-    private By passwordField = By.id("password");
-    private By nameAsPerBankField = By.id("nameAsPerBank");
-    private By bankNameField = By.id("bankName");
-    private By ifscCodeField = By.id("ifscCode");
-    private By bankAccountNumberField = By.id("bankAccountNumber");
-    private By panNumberBankField = By.id("panNumberBank");
-    private By submitButton = By.cssSelector("#addEmployeeForm button[type='submit']");
+    private By firstNameField = By.id("_r_1i_-form-item");
+    private By lastNameField = By.id("_r_1j_-form-item");
+    private By designationField = By.id("_r_1m_-form-item");
+    private By departmentField = By.id("_r_1n_-form-item");
+    private By employeeTypeDropdown = By.id("_r_1p_-form-item");
+    private By contactField = By.id("_r_1r_-form-item");
+    private By emailField = By.id("_r_1k_-form-item");
+    private By dateOfJoiningField = By.id("_r_1s_-form-item");
+    private By dobField = By.id("_r_1t_-form-item");
+    private By passwordField = By.id("_r_1l_-form-item");
+    private By nameAsPerBankField = By.id("_r_1v_-form-item");
+    private By bankNameField = By.id("_r_20_-form-item");
+    private By ifscCodeField = By.id("_r_21_-form-item");
+    private By bankAccountNumberField = By.id("_r_22_-form-item");
+    private By panNumberBankField = By.id("_r_23_-form-item");
+    private By submitButton = By.xpath("//button[@class='inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2']")
 
     public AddEmployeePage(WebDriver driver) {
         // Constructor to initialize the WebDriver and WebDriverWait

@@ -26,14 +26,14 @@ public class AddSalaryFullTime {
 
     // Modal locators
     private By employeeDropdown = By.id("employeeSelect");
-    private By grossInput = By.id("grossInput");
+    private By grossInput = By.id("gross");
     private By basicPayDisplay = By.id("basicPayDisplay");
     private By hraDisplay = By.id("hraDisplay");
     private By specialAllowanceDisplay = By.id("specialAllowanceDisplay");
     private By taxInput = By.id("projectedIncomeTaxInput");
 
     // Updated: More specific Save button locator using XPath
-    private By saveButton = By.xpath("//button[@type='submit' and contains(@class,'btn-primary') and normalize-space()='Save']");
+    private By saveButton = By.xpath(" //*[@id="radix-_r_38_"]/form/div[11]/button[2]");
 
     // Navigation actions
     public void clickSalaryStructureMenu() {
