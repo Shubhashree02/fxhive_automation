@@ -4,12 +4,21 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import AdminPage.AllEmployeePage;
+import org.openqa.selenium.WebDriver;
+import org.testng.annotations.BeforeClass;
 
-public class AllEmployeeTest extends BaseTest {
+public class AllEmployeeTest {
    private AllEmployeePage employeePage;
+   private WebDriver driver;
+
+    @BeforeClass(alwaysRun = true)
+    public void init() {
+        driver = StageSuiteSession.getDriver();
+    }
 
     @Test
     public void testSearchEmployee() {
+        StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
         employeePage.searchEmployee("Shruti Mehta");
         // Add assertions to verify the search results
@@ -18,6 +27,7 @@ public class AllEmployeeTest extends BaseTest {
 
     @Test
     public void testFilterByEmployeeType() {
+        StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
         employeePage.selectEmployeeType("Full time");
         // Add assertions to verify the filter results
@@ -26,6 +36,7 @@ public class AllEmployeeTest extends BaseTest {
 
     @Test
     public void testFilterByDepartment() {
+        StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
         employeePage.selectDepartment("HR");
         // Add assertions to verify the filter results
@@ -34,6 +45,7 @@ public class AllEmployeeTest extends BaseTest {
 
     @Test
     public void testFilterByStatus() {
+        StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
         employeePage.selectStatus("Active");
         // Add assertions to verify the filter results
@@ -42,6 +54,7 @@ public class AllEmployeeTest extends BaseTest {
 
     @Test
     public void testResetFilters() {
+        StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
         employeePage.selectEmployeeType("Intern");
         employeePage.selectDepartment("Tech");

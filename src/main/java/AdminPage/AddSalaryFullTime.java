@@ -33,7 +33,7 @@ public class AddSalaryFullTime {
     private By taxInput = By.id("projectedIncomeTaxInput");
 
     // Updated: More specific Save button locator using XPath
-    private By saveButton = By.xpath(" //*[@id="radix-_r_38_"]/form/div[11]/button[2]");
+    private By saveButton = By.xpath("//*[@id='radix-_r_38_']/form/div[11]/button[2]");
 
     // Navigation actions
     public void clickSalaryStructureMenu() {

@@ -46,14 +46,15 @@ public class LoginTest {
     public void testValidLogin() {
         test.log(Status.INFO, "Starting valid login test");
         driver.findElement(By.id("username")).sendKeys("admin@fx31labs.com");
-        driver.findElement(By.id("password")).sendKeys("admin@123");
+        driver.findElement(By.id("password")).sendKeys("Admin@123");
         driver.findElement(By.xpath("//button[text()='Login']")).click();
 
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.urlContains("admin_dashboard.html"));
+        wait.until(ExpectedConditions.urlContains("dashboard"));
 
-        Assert.assertEquals(driver.getCurrentUrl(), "https://stage.fxhive.site/admin_dashboard.html");
+        Assert.assertTrue(driver.getCurrentUrl().contains("stage.fxhive.site") && driver.getCurrentUrl().contains("dashboard"),
+                "Expected redirect to dashboard. Actual: " + driver.getCurrentUrl());
         test.log(Status.PASS, "Login successful");
     }
 

@@ -6,7 +6,6 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
@@ -17,24 +16,29 @@ public class AddEmployeePage {
     private WebDriverWait wait;
 
     // Locators for form elements
-    private By addEmployeeLink = By.cssSelector("a[data-content='addEmployee']");
-    private By addEmployeeForm = By.id("addEmployeeForm");
-    private By firstNameField = By.id("_r_1i_-form-item");
-    private By lastNameField = By.id("_r_1j_-form-item");
-    private By designationField = By.id("_r_1m_-form-item");
-    private By departmentField = By.id("_r_1n_-form-item");
-    private By employeeTypeDropdown = By.id("_r_1p_-form-item");
-    private By contactField = By.id("_r_1r_-form-item");
-    private By emailField = By.id("_r_1k_-form-item");
-    private By dateOfJoiningField = By.id("_r_1s_-form-item");
-    private By dobField = By.id("_r_1t_-form-item");
-    private By passwordField = By.id("_r_1l_-form-item");
-    private By nameAsPerBankField = By.id("_r_1v_-form-item");
-    private By bankNameField = By.id("_r_20_-form-item");
-    private By ifscCodeField = By.id("_r_21_-form-item");
-    private By bankAccountNumberField = By.id("_r_22_-form-item");
-    private By panNumberBankField = By.id("_r_23_-form-item");
-    private By submitButton = By.xpath("//button[@class='inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2']")
+    // Stage: Employee sidebar link (navigates to /admin/employees)
+    private By employeeSidebarLink = By.cssSelector("a[href='/admin/employees']");
+    // Stage: Add Employee button on the employees page
+    private By addEmployeeButton = By.xpath("//button[contains(.,'Add Employee')]");
+    // Stage: name-based locators (stable; no dynamic ids)
+    private By firstNameField = By.cssSelector("input[name='firstName']");
+    private By lastNameField = By.cssSelector("input[name='lastName']");
+    private By designationField = By.cssSelector("input[name='designation']");
+    private By contactField = By.cssSelector("input[name='contact']");
+    private By emailField = By.cssSelector("input[name='email']");
+    private By dateOfJoiningField = By.cssSelector("input[name='dateOfJoining']");
+    private By dobField = By.cssSelector("input[name='dob']");
+    private By passwordField = By.cssSelector("input[name='password']");
+    private By nameAsPerBankField = By.cssSelector("input[name='bankDetails.nameAsPerBank']");
+    private By bankNameField = By.cssSelector("input[name='bankDetails.bankName']");
+    private By ifscCodeField = By.cssSelector("input[name='bankDetails.ifscCode']");
+    private By bankAccountNumberField = By.cssSelector("input[name='bankDetails.accountNumber']");
+    private By panNumberBankField = By.cssSelector("input[name='bankDetails.panNumber']");
+    // Stage: comboboxes by label (button that opens list)
+    private By departmentCombobox = By.xpath("//div[contains(@class,'space-y-2')]//label[contains(.,'Department')]/following-sibling::button[@role='combobox']");
+    private By employeeTypeCombobox = By.xpath("//div[contains(@class,'space-y-2')]//label[contains(.,'Employee Type')]/following-sibling::button[@role='combobox']");
+    // Stage: Add Employee submit button (type=submit, text "Add Employee" in dialog form)
+    private By submitButton = By.xpath("//div[@role='dialog']//form//button[@type='submit' and contains(.,'Add Employee')]");
 
     public AddEmployeePage(WebDriver driver) {
         // Constructor to initialize the WebDriver and WebDriverWait
@@ -42,16 +46,35 @@ public class AddEmployeePage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
 }
-    // Action to click on Add Employee link
+    /** Stage: Click Employee sidebar tab and wait for /admin/employees page. */
+    public void openEmployeesPage() {
+        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(employeeSidebarLink));
+        link.click();
+        wait.until(ExpectedConditions.urlContains("/admin/employees"));
+    }
+
+    /** Stage: Click the Add Employee button on the employees page to open the form. */
+    public void clickAddEmployeeButton() {
+        WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(addEmployeeButton));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", btn);
+        btn.click();
+        try { Thread.sleep(1500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+    }
+
+    // Action to click on Add Employee link (legacy — not used on Stage)
     public void clickAddEmployeeLink() {
-        // Find the Add Employee link and click it
+        By addEmployeeLink = By.cssSelector("a[data-content='addEmployee']");
         WebElement addEmployeeLinkElement = wait.until(ExpectedConditions.elementToBeClickable(addEmployeeLink));
         addEmployeeLinkElement.click();
     }
-    // Wait for the Add Employee form to be visible
+    // Wait for the Add Employee form (Stage: dialog — first name field by name)
     public void waitForAddEmployeeForm() {
-        // Wait until the Add Employee form is visible
-        WebElement addEmployeeFormElement = wait.until(ExpectedConditions.visibilityOfElementLocated(addEmployeeForm));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(firstNameField));
+    }
+
+    /** Returns the visible email field (for validation message etc.). */
+    public WebElement getEmailField() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(emailField));
     }
     // Method to enter the first name
     public void enterFirstName(String firstName) {
@@ -68,19 +91,21 @@ public void enterLastName(String lastName) {
     // Wait until the designation field is visible and then enter the designation
     wait.until(ExpectedConditions.visibilityOfElementLocated(designationField)).sendKeys(designation);
 }
-// Method to enter the department
-public void enterDepartment(String department) {
-    // Wait until the department field is visible and then enter the department
-    wait.until(ExpectedConditions.visibilityOfElementLocated(departmentField)).sendKeys(department);
-}
- // Method to select the employee type
+// Method to enter the department (Stage: combobox — click button then option by text)
+    public void enterDepartment(String department) {
+        WebElement combobox = wait.until(ExpectedConditions.elementToBeClickable(departmentCombobox));
+        combobox.click();
+        By optionLocator = By.xpath("//*[@role='option' and normalize-space()='" + department + "']");
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
+        option.click();
+    }
+// Method to select the employee type (Stage: combobox — click button then option by text)
     public void selectEmployeeType(String type) {
-        // Wait until the employee type dropdown is visible
-        WebElement employeeTypeElement = wait.until(ExpectedConditions.visibilityOfElementLocated(employeeTypeDropdown));
-        // Create a Select object to interact with the dropdown
-        Select employeeTypeSelect = new Select(employeeTypeElement);
-        // Select the employee type by visible text
-        employeeTypeSelect.selectByVisibleText(type);
+        WebElement combobox = wait.until(ExpectedConditions.elementToBeClickable(employeeTypeCombobox));
+        combobox.click();
+        By optionLocator = By.xpath("//*[@role='option' and normalize-space()='" + type + "']");
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
+        option.click();
     }
 
     // Method to enter the contact number
@@ -89,7 +114,7 @@ public void enterDepartment(String department) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(contactField)).sendKeys(contact);
     }
 
-    // Method to enter the email address
+    // Method to enter the email (must contain '@' and valid format; UI shows "Please include an '@'..." when invalid)
     public void enterEmail(String email) {
         // Wait until the email field is visible and then enter the email address
         wait.until(ExpectedConditions.visibilityOfElementLocated(emailField)).sendKeys(email);
@@ -105,7 +130,7 @@ public void enterDepartment(String department) {
         dojElement.sendKeys(date);
     }
 
-    // Method to enter the date of birth
+    // Method to enter the date of birth (employee must be above 14 years old per validation)
     public void enterDateOfBirth(String dob) {
         // Wait until the date of birth field is visible
         WebElement dobElement = wait.until(ExpectedConditions.visibilityOfElementLocated(dobField));
@@ -115,7 +140,7 @@ public void enterDepartment(String department) {
         dobElement.sendKeys(dob);
     }
 
-    // Method to enter the password
+    // Method to enter the password (rule: 6+ chars, upper, lower, number, special char, no spaces)
     public void enterPassword(String password) {
         // Wait until the password field is visible and then enter the password
         wait.until(ExpectedConditions.visibilityOfElementLocated(passwordField)).sendKeys(password);
@@ -173,6 +198,7 @@ public void enterDepartment(String department) {
     }
 
     // Method to fill the entire employee form
+    // Email must follow the rule: contain '@' and valid format (e.g. local@domain); otherwise validation will fail.
     public void fillEmployeeForm(String firstName, String lastName, String designation, String department,
                                    String employeeType, String contact, String email, String dateOfJoining,
                                    String dob, String password, String nameAsPerBank, String bankName,

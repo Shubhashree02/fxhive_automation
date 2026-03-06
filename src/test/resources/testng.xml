@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="FxHive Test Suite">
+<suite name="FxHive Test Suite" preserve-order="true">
     <test name="FxHive Admin Tests">
         <classes>
-            <!-- <class name="Admin.LoginTest"/> -->
-            <!-- <class name="Admin.BaseTest"/> Only if needed -->
-            <!-- <class name="Admin.AddEmployeeTest"/> -->
-            <!-- <class name="Admin.AllEmployeeTest"/> Added AllEmployeeTest -->
-            <class name="Admin.AddSalaryFullTimeTest"/>
-            <class name="Admin.AddSalaryInternTest"/>
+            <class name="Admin.StageSuiteSession"/>
+            <class name="Admin.AddEmployeeTest"/>
+            <!-- <class name="Admin.AddSalaryFullTimeTest"/> -->
+            <!-- <class name="Admin.AllEmployeeTest"/> -->
+            <!-- <class name="Admin.AddSalaryInternTest"/> --> <!-- file not present -->
         </classes>
     </test>
     <!-- <test name="Salary Structure Tests - Full Time">

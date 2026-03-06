@@ -3,17 +3,26 @@ package Admin;
 import AdminPage.AddSalaryFullTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
+import org.testng.annotations.BeforeClass;
 import java.time.Duration;
 
-public class AddSalaryFullTimeTest extends BaseTest {
+public class AddSalaryFullTimeTest {
+    private WebDriver driver;
+
+    @BeforeClass(alwaysRun = true)
+    public void init() {
+        driver = StageSuiteSession.getDriver();
+    }
 
     @Test(invocationCount = 4)
     public void testAddSalaryFlow() {
+        StageSuiteSession.ensureOnDashboard();
         AddSalaryFullTime addSalaryPage = new AddSalaryFullTime(driver);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
