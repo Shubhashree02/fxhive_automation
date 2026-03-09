@@ -7,7 +7,6 @@ import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterSuite;
@@ -16,9 +15,6 @@ import org.testng.annotations.BeforeSuite;
 import java.time.Duration;
 
 public class StageSuiteSession {
-    private static final String BASE_URL = "https://stage.fxhive.site/";
-    private static final String DASHBOARD_URL = "https://stage.fxhive.site/admin/dashboard";
-
     private static WebDriver driver;
 
     private static ExtentReports extent;
@@ -31,11 +27,11 @@ public class StageSuiteSession {
         extent.attachReporter(spark);
         parentTest = extent.createTest("FxHive Stage UI Test Suite");
 
-        driver = new ChromeDriver();
+        driver = TestConfig.createDriver();
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
-        driver.get(BASE_URL);
+        driver.get(TestConfig.getBaseUrl());
         loginValid();
     }
 
@@ -52,8 +48,8 @@ public class StageSuiteSession {
 
             usernameField.clear();
             passwordField.clear();
-            usernameField.sendKeys("admin@fx31labs.com");
-            passwordField.sendKeys("Admin@123");
+            usernameField.sendKeys(TestConfig.getUsername());
+            passwordField.sendKeys(TestConfig.getPassword());
             loginButton.click();
 
             wait.until(ExpectedConditions.urlContains("dashboard"));
@@ -87,7 +83,7 @@ public class StageSuiteSession {
             // ignore
         }
         if (url == null || !url.contains("dashboard")) {
-            d.get(DASHBOARD_URL);
+            d.get(TestConfig.getDashboardUrl());
         }
     }
 

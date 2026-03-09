@@ -7,3 +7,4 @@ test-output/
 screenshots
 .settings/
 .cursor/
+src/test/resources/config.properties

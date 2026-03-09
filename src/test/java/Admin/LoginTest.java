@@ -3,7 +3,6 @@ package Admin;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -35,18 +34,18 @@ public class LoginTest {
     @BeforeMethod
     public void setUp() {
         //System.setProperty("webdriver.chrome.driver", "C:\\chromedriver\\chrome-win64\\chromedriver.exe");
-        driver = new ChromeDriver();
+        driver = TestConfig.createDriver();
         driver.manage().window().maximize();
         test = extent.createTest(this.getClass().getSimpleName()); // Initialize test here
         test.log(Status.INFO, "Launching browser and navigating to URL");
-        driver.get("https://stage.fxhive.site/");
+        driver.get(TestConfig.getBaseUrl());
     }
 
     @Test(priority = 1)
     public void testValidLogin() {
         test.log(Status.INFO, "Starting valid login test");
-        driver.findElement(By.id("username")).sendKeys("admin@fx31labs.com");
-        driver.findElement(By.id("password")).sendKeys("Admin@123");
+        driver.findElement(By.id("username")).sendKeys(TestConfig.getUsername());
+        driver.findElement(By.id("password")).sendKeys(TestConfig.getPassword());
         driver.findElement(By.xpath("//button[text()='Login']")).click();
 
 
@@ -83,7 +82,7 @@ public class LoginTest {
     @Test(priority = 3)
     public void testInvalidPassword() {
         test.log(Status.INFO, "Testing invalid password");
-        driver.findElement(By.id("username")).sendKeys("admin@fx31labs.com");
+        driver.findElement(By.id("username")).sendKeys(TestConfig.getUsername());
         driver.findElement(By.id("password")).sendKeys("wrongpass");
         driver.findElement(By.xpath("//button[text()='Login']")).click();
 
