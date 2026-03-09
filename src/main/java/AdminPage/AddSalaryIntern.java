@@ -50,12 +50,28 @@ public class AddSalaryIntern {
     public void clickAddNewSalaryBtn() {
         WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(addNewSalaryBtn));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", btn);
-        btn.click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(grossInput));
+        try {
+            btn.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+        }
+        // Wait for modal: either #employeeSelect or button[role='combobox'] (app may use different markup for Intern)
+        WebDriverWait modalWait = new WebDriverWait(driver, Duration.ofSeconds(25));
+        modalWait.until(d -> {
+            if (!d.findElements(employeeDropdownTrigger).isEmpty() && d.findElement(employeeDropdownTrigger).isDisplayed()) return true;
+            return d.findElements(By.cssSelector("button[role='combobox']")).stream().anyMatch(WebElement::isDisplayed);
+        });
+        WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        try {
+            shortWait.until(ExpectedConditions.visibilityOfElementLocated(grossInput));
+        } catch (org.openqa.selenium.TimeoutException e) {
+            // Intern form may show gross after employee selected
+        }
     }
 
     public void selectEmployeeByIndex(int index) {
-        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeDropdownTrigger));
+        By employeeTrigger = getEmployeeTriggerLocator();
+        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeTrigger));
         trigger.click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(employeeDropdownOptions));
         List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(employeeDropdownOptions));
@@ -64,6 +80,13 @@ public class AddSalaryIntern {
         } else {
             throw new IllegalArgumentException("Employee option index " + index + " out of range (0-" + (options.size() - 1) + ")");
         }
+    }
+
+    private By getEmployeeTriggerLocator() {
+        if (!driver.findElements(employeeDropdownTrigger).isEmpty() && driver.findElement(employeeDropdownTrigger).isDisplayed()) {
+            return employeeDropdownTrigger;
+        }
+        return By.cssSelector("button[role='combobox']");
     }
 
     public void enterGross(String grossAmount) {

@@ -46,10 +46,17 @@ public class AddSalaryConsultant {
     public void clickAddNewSalaryBtn() {
         WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(addNewSalaryBtn));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", btn);
-        btn.click();
-        // Wait for modal to open (employee dropdown visible)
-        wait.until(ExpectedConditions.visibilityOfElementLocated(employeeDropdownTrigger));
-        // Brief wait for form fields (e.g. gross) to render
+        try {
+            btn.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+        }
+        // Wait for modal: either #employeeSelect or button[role='combobox'] (app may use different markup for Consultant)
+        WebDriverWait modalWait = new WebDriverWait(driver, Duration.ofSeconds(25));
+        modalWait.until(d -> {
+            if (!d.findElements(employeeDropdownTrigger).isEmpty() && d.findElement(employeeDropdownTrigger).isDisplayed()) return true;
+            return d.findElements(By.cssSelector("button[role='combobox']")).stream().anyMatch(WebElement::isDisplayed);
+        });
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
@@ -58,7 +65,8 @@ public class AddSalaryConsultant {
     }
 
     public void selectEmployeeByIndex(int index) {
-        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeDropdownTrigger));
+        By employeeTrigger = getEmployeeTriggerLocator();
+        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeTrigger));
         trigger.click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(employeeDropdownOptions));
         List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(employeeDropdownOptions));
@@ -73,6 +81,13 @@ public class AddSalaryConsultant {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private By getEmployeeTriggerLocator() {
+        if (!driver.findElements(employeeDropdownTrigger).isEmpty() && driver.findElement(employeeDropdownTrigger).isDisplayed()) {
+            return employeeDropdownTrigger;
+        }
+        return By.cssSelector("button[role='combobox']");
     }
 
     /** Enter Consultancy Fees (id="consultancyFee"). Waits for field to be visible; if disabled, uses JS to set value. */

@@ -9,6 +9,10 @@
             <class name="Admin.AddSalaryInternTest"/>
             <class name="Admin.AddSalaryContractualTest"/>
             <class name="Admin.AddSalaryConsultantTest"/>
+            <class name="Admin.GeneratePayrollFullTimeTest"/>
+            <class name="Admin.GeneratePayrollInternTest"/>
+            <class name="Admin.GeneratePayrollContractualTest"/>
+            <class name="Admin.GeneratePayrollConsultantTest"/>
             <!-- <class name="Admin.AllEmployeeTest"/> -->
         </classes>
     </test>

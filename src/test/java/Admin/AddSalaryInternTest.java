@@ -44,7 +44,7 @@ public class AddSalaryInternTest {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("employeeSelect")));
 
         // Step 4–5: Fill details (select employee, enter gross)
-        addSalaryPage.selectEmployeeByIndex(1);
+        addSalaryPage.selectEmployeeByIndex(0);
         int gross = 50000;
         addSalaryPage.enterGross(String.valueOf(gross));
 
