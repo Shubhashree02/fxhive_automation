@@ -1,7 +1,6 @@
 .classpath
 .factorypath
 .project
-pom.xml
 target
 test-output/
 screenshots

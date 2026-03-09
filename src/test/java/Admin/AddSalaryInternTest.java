@@ -1,6 +1,6 @@
 package Admin;
 
-import AdminPage.AddSalaryFullTime;
+import AdminPage.AddSalaryIntern;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -12,7 +12,11 @@ import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
 import java.time.Duration;
 
-public class AddSalaryFullTimeTest {
+/**
+ * Test: Add Salary for Intern.
+ * Flow: Click Salary Structure → Click Intern → Add New Salary → Select employee, enter gross → Save.
+ */
+public class AddSalaryInternTest {
     private WebDriver driver;
 
     @BeforeClass(alwaysRun = true)
@@ -20,19 +24,19 @@ public class AddSalaryFullTimeTest {
         driver = StageSuiteSession.getDriver();
     }
 
-    @Test(invocationCount = 1)
-    public void testAddSalaryFlow() {
+    @Test
+    public void testAddSalaryInternFlow() {
         StageSuiteSession.ensureOnDashboard();
-        AddSalaryFullTime addSalaryPage = new AddSalaryFullTime(driver);
+        AddSalaryIntern addSalaryPage = new AddSalaryIntern(driver);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
         // Step 1: Click on Salary Structure menu
         addSalaryPage.clickSalaryStructureMenu();
         wait.until(ExpectedConditions.elementToBeClickable(
-            By.cssSelector("a[href='/admin/salary-structure?type=full-time']")));
+            By.cssSelector("a[href='/admin/salary-structure?type=intern']")));
 
-        // Step 2: Click on 'Full Time' option
-        addSalaryPage.clickFullTimeOption();
+        // Step 2: Click on 'Intern' option
+        addSalaryPage.clickInternOption();
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[title='Add New Salary']")));
 
         // Step 3: Click on 'Add New Salary' button
@@ -41,59 +45,38 @@ public class AddSalaryFullTimeTest {
 
         // Step 4–5: Fill details (select employee, enter gross)
         addSalaryPage.selectEmployeeByIndex(1);
-        int gross = 100000;
+        int gross = 50000;
         addSalaryPage.enterGross(String.valueOf(gross));
 
-        // Step 6: Validate calculated components then click Save button
-        int basic = gross * 40 / 100;
-        int hra = basic * 40 / 100;
-        int special = gross - (basic + hra);
-        addSalaryPage.verifySalaryComponents(gross);
-        addSalaryPage.verifyTaxCalculation(basic, hra, special);
-        // Click Save button
+        // Step 6: Click Save button
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("form button[type='submit']")));
         addSalaryPage.clickSave();
 
-        // Optional: Pause for manual inspection (remove this in production)
         try {
-            Thread.sleep(2000); // 2 seconds to visually check for popup/alert
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
-        // Step 8: Try to handle JavaScript alert after saving
         handleAlertIfPresent(wait);
 
-        System.out.println("✅ Salary structure added and validated successfully.");
+        System.out.println("✅ Intern salary structure added and saved successfully.");
     }
 
-    /**
-     * Handles a JavaScript alert if present, otherwise prints a message.
-     */
     private void handleAlertIfPresent(WebDriverWait wait) {
-        // Try direct switch to alert first
         try {
             Alert alert = driver.switchTo().alert();
-            String alertText = alert.getText();
-            System.out.println("Alert says: " + alertText);
+            System.out.println("Alert: " + alert.getText());
             alert.accept();
-            System.out.println("Alert was handled directly.");
-            return;
         } catch (NoAlertPresentException e) {
-            System.out.println("No alert present (direct switch).");
+            System.out.println("No alert present.");
         }
-
-        // Fallback: try explicit wait for alert
         try {
             Alert alert = wait.until(ExpectedConditions.alertIsPresent());
-            String alertText = alert.getText();
-            System.out.println("Alert says (wait): " + alertText);
+            System.out.println("Alert (wait): " + alert.getText());
             alert.accept();
-            System.out.println("Alert was handled (wait).");
         } catch (TimeoutException te) {
-            System.out.println("No JavaScript alert appeared after saving (even after wait).");
-            System.out.println("If you see a popup but Selenium doesn't, it may be a custom modal or OS-level dialog.");
-            System.out.println("Try to inspect the popup or ask your developer for its HTML structure.");
+            System.out.println("No JavaScript alert after save.");
         }
     }
-} 
+}
