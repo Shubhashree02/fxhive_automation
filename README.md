@@ -104,7 +104,21 @@ The `test-output/` directory is in `.gitignore` and is generated on each test ru
 
 ## Configuration & Credentials
 
-Tests use default Stage credentials (e.g. `admin@fx31labs.com` / `Admin@123`). These are for automated testing only. For other environments or shared use, consider moving credentials to environment variables or a config file.
+URLs and login credentials are read from **config** so they are not hardcoded in the repo.
+
+- **`src/test/resources/config.example.properties`** – example with placeholder values (committed).
+- **`src/test/resources/config.properties`** – real values (not committed; in `.gitignore`).
+
+**First-time setup:** Copy `config.example.properties` to `config.properties` and set your Stage username and password:
+
+```properties
+base.url=https://stage.fxhive.site/
+dashboard.url=https://stage.fxhive.site/admin/dashboard
+username=your-stage-email@example.com
+password=your-stage-password
+```
+
+StageSuiteSession and LoginTest use `TestConfig` to load these values. Do not commit `config.properties`.
 
 ## Build
 
