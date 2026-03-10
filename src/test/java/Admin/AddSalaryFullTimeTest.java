@@ -40,7 +40,7 @@ public class AddSalaryFullTimeTest {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("employeeSelect")));
 
         // Step 4–5: Fill details (select employee, enter gross)
-        addSalaryPage.selectEmployeeByIndex(1);
+        addSalaryPage.selectEmployeeByIndex(0);
         int gross = 100000;
         addSalaryPage.enterGross(String.valueOf(gross));
 
