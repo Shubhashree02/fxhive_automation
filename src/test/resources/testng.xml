@@ -5,9 +5,15 @@
         <classes>
             <class name="Admin.StageSuiteSession"/>
             <class name="Admin.AddEmployeeTest"/>
-            <!-- <class name="Admin.AddSalaryFullTimeTest"/> -->
+            <class name="Admin.AddSalaryFullTimeTest"/>
+            <class name="Admin.AddSalaryInternTest"/>
+            <class name="Admin.AddSalaryContractualTest"/>
+            <class name="Admin.AddSalaryConsultantTest"/>
+            <class name="Admin.GeneratePayrollFullTimeTest"/>
+            <class name="Admin.GeneratePayrollInternTest"/>
+            <class name="Admin.GeneratePayrollContractualTest"/>
+            <class name="Admin.GeneratePayrollConsultantTest"/>
             <!-- <class name="Admin.AllEmployeeTest"/> -->
-            <!-- <class name="Admin.AddSalaryInternTest"/> --> <!-- file not present -->
         </classes>
     </test>
     <!-- <test name="Salary Structure Tests - Full Time">

@@ -9,23 +9,26 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.List;
 
-public class AddSalaryFullTime {
+/**
+ * Page object for Add Salary - Intern flow.
+ * Flow: Salary Structure menu → Intern → Add New Salary → enter data → Save.
+ */
+public class AddSalaryIntern {
     WebDriver driver;
     WebDriverWait wait;
 
-    public AddSalaryFullTime(WebDriver driver) {
+    public AddSalaryIntern(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
     }
 
     // Page navigation locators
     private By salaryStructureMenu = By.xpath("//span[text()='Salary Structure']");
-    // Full Time: <a class="flex items-center gap-3 rounded-lg px-3 py-1.5 ..." href="/admin/salary-structure?type=full-time"><svg>...</svg><span class="truncate">Full Time</span></a>
-    private By fullTimeOption = By.cssSelector("a[href='/admin/salary-structure?type=full-time']");
-    // Add New Salary: <button class="inline-flex items-center justify-center gap-2 ... bg-primary ..." title="Add New Salary"><svg class="lucide lucide-plus ...">...</svg>Add New Salary</button>
+    // Intern link: same pattern as Full Time, href for intern
+    private By internOption = By.cssSelector("a[href='/admin/salary-structure?type=intern']");
     private By addNewSalaryBtn = By.cssSelector("button[title='Add New Salary']");
 
-    // Modal locators (employee is a custom dropdown trigger button, not <select>)
+    // Modal locators (same as Full Time)
     private By employeeDropdownTrigger = By.id("employeeSelect");
     private By employeeDropdownOptions = By.cssSelector("[role='option']");
     private By grossInput = By.id("gross");
@@ -33,29 +36,42 @@ public class AddSalaryFullTime {
     private By hraDisplay = By.id("hraDisplay");
     private By specialAllowanceDisplay = By.id("specialAllowanceDisplay");
     private By taxInput = By.id("projectedIncomeTaxInput");
-
-    // Save: <button type="submit" class="... bg-primary text-primary-foreground ..." disabled="">Save</button> (sibling of Cancel type="button")
+    // Save: <button type="submit" class="... bg-primary text-primary-foreground ..." disabled="">Save</button> (Cancel is type="button")
     private By saveButton = By.cssSelector("form button[type='submit']");
 
-    // Navigation actions
     public void clickSalaryStructureMenu() {
         wait.until(ExpectedConditions.elementToBeClickable(salaryStructureMenu)).click();
     }
 
-    public void clickFullTimeOption() {
-        wait.until(ExpectedConditions.elementToBeClickable(fullTimeOption)).click();
+    public void clickInternOption() {
+        wait.until(ExpectedConditions.elementToBeClickable(internOption)).click();
     }
 
     public void clickAddNewSalaryBtn() {
         WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(addNewSalaryBtn));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", btn);
-        btn.click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(grossInput));
+        try {
+            btn.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+        }
+        // Wait for modal: either #employeeSelect or button[role='combobox'] (app may use different markup for Intern)
+        WebDriverWait modalWait = new WebDriverWait(driver, Duration.ofSeconds(25));
+        modalWait.until(d -> {
+            if (!d.findElements(employeeDropdownTrigger).isEmpty() && d.findElement(employeeDropdownTrigger).isDisplayed()) return true;
+            return d.findElements(By.cssSelector("button[role='combobox']")).stream().anyMatch(WebElement::isDisplayed);
+        });
+        WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        try {
+            shortWait.until(ExpectedConditions.visibilityOfElementLocated(grossInput));
+        } catch (org.openqa.selenium.TimeoutException e) {
+            // Intern form may show gross after employee selected
+        }
     }
 
-    // Modal Actions - custom dropdown: click trigger then click Nth option
     public void selectEmployeeByIndex(int index) {
-        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeDropdownTrigger));
+        By employeeTrigger = getEmployeeTriggerLocator();
+        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeTrigger));
         trigger.click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(employeeDropdownOptions));
         List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(employeeDropdownOptions));
@@ -66,11 +82,17 @@ public class AddSalaryFullTime {
         }
     }
 
+    private By getEmployeeTriggerLocator() {
+        if (!driver.findElements(employeeDropdownTrigger).isEmpty() && driver.findElement(employeeDropdownTrigger).isDisplayed()) {
+            return employeeDropdownTrigger;
+        }
+        return By.cssSelector("button[role='combobox']");
+    }
+
     public void enterGross(String grossAmount) {
         WebElement gross = wait.until(ExpectedConditions.visibilityOfElementLocated(grossInput));
         gross.clear();
         gross.sendKeys(grossAmount);
-        // Wait for salary breakdown to update (calculated fields may update on blur/change)
         try {
             Thread.sleep(1500);
         } catch (InterruptedException e) {
@@ -105,25 +127,20 @@ public class AddSalaryFullTime {
         assert actualTax == tax : "Tax calculation mismatch: expected " + tax + ", found " + actualTax;
     }
 
-    // Robust Save Button Click (with scroll and JS fallback)
     public void clickSave() {
         try {
-            List<WebElement> saveButtons = driver.findElements(saveButton);
-            System.out.println("Number of Save buttons found: " + saveButtons.size());
-
             WebElement saveButtonElement = wait.until(ExpectedConditions.elementToBeClickable(saveButton));
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", saveButtonElement);
             saveButtonElement.click();
-            System.out.println("Clicked the Save button.");
+            System.out.println("Clicked the Save button (Intern).");
         } catch (Exception e) {
             System.out.println("Error clicking the Save button: " + e.getMessage());
-            // Fallback: Try JS click if normal click fails
             try {
                 WebElement saveButtonElement = driver.findElement(saveButton);
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButtonElement);
                 System.out.println("Clicked the Save button with JavaScript.");
             } catch (Exception ex) {
-                System.out.println("Failed to click the Save button even with JavaScript: " + ex.getMessage());
+                throw new RuntimeException("Failed to click Save: " + ex.getMessage());
             }
         }
     }

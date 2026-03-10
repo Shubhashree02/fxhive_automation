@@ -31,10 +31,12 @@ public class AddEmployeeTest {
     /** Date of birth: February 2009 (above 14 years). */
     private static final LocalDate DOB_FEB_2009 = LocalDate.of(2009, 2, 1);
 
+    /** Employee types to add (one employee per type) before moving to next step. */
+    private static final String[] EMPLOYEE_TYPES = { "Full time", "Intern", "Contractual", "Consultant" };
+
     /** Builds a valid employee email per rule: contains '@' and valid format (local@domain). */
-    private static String buildValidEmployeeEmail(String firstName, String lastName) {
-        long timestamp = System.currentTimeMillis();
-        return firstName.toLowerCase() + "." + lastName.toLowerCase() + timestamp + "@example.com";
+    private static String buildValidEmployeeEmail(String firstName, String lastName, String suffix) {
+        return firstName.toLowerCase() + "." + lastName.toLowerCase() + suffix + "@example.com";
     }
 
     @BeforeClass(alwaysRun = true)
@@ -45,69 +47,66 @@ public class AddEmployeeTest {
     @Test(priority = 1)
     public void testAddEmployeePositiveCase() {
 
-        System.out.println(">>> testAddEmployeePositiveCase() started");
+        System.out.println(">>> testAddEmployeePositiveCase() started – adding all employee types");
 
         StageSuiteSession.ensureOnDashboard();
         com.aventstack.extentreports.ExtentTest addEmployeeTest =
-                StageSuiteSession.createNode("Add Employee Test - Positive Case");
+                StageSuiteSession.createNode("Add Employee Test - Add All Types");
         AddEmployeePage addEmployeePage = new AddEmployeePage(driver);
+        Faker faker = new Faker();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH);
+        LocalDate today = LocalDate.now();
+        LocalDate joiningDate = today.minusDays(30);
+        String dob = DOB_FEB_2009.format(formatter);
+        String dateOfJoining = joiningDate.format(formatter);
+
         try {
-            addEmployeeTest.log(Status.INFO, "Test starting: Positive case");
-            addEmployeeTest.log(Status.INFO, "Current URL: " + driver.getCurrentUrl());
-
+            addEmployeeTest.log(Status.INFO, "Adding one employee per type: Full time, Intern, Contractual, Consultant");
             addEmployeePage.openEmployeesPage();
-            addEmployeePage.clickAddEmployeeButton();
-            addEmployeePage.waitForAddEmployeeForm();
-            addEmployeeTest.log(Status.INFO, "Navigated to Add Employee form");
 
-            // Dates: DOB Feb 2009 (above 14 years); date of joining 30 days ago
-            LocalDate today = LocalDate.now();
-            LocalDate joiningDate = today.minusDays(30);
+            for (int i = 0; i < EMPLOYEE_TYPES.length; i++) {
+                String employeeType = EMPLOYEE_TYPES[i];
+                addEmployeeTest.log(Status.INFO, "Adding employee type: " + employeeType);
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH);
-            String dob = DOB_FEB_2009.format(formatter);
-            String dateOfJoining = joiningDate.format(formatter);
+                addEmployeePage.clickAddEmployeeButton();
+                addEmployeePage.waitForAddEmployeeForm();
 
-            // Use Faker for realistic random names; email must follow rule (contain '@', valid format)
-            Faker faker = new Faker();
-            String firstName = faker.name().firstName();
-            String lastName = faker.name().lastName();
-            String fullName = firstName + " " + lastName;
-            String newEmail = buildValidEmployeeEmail(firstName, lastName);
+                String firstName = faker.name().firstName();
+                String lastName = faker.name().lastName();
+                String fullName = firstName + " " + lastName;
+                String suffix = "_" + employeeType.replace(" ", "") + "_" + System.currentTimeMillis();
+                String newEmail = buildValidEmployeeEmail(firstName, lastName, suffix);
 
-            addEmployeePage.fillEmployeeForm(
-                    firstName, lastName, "Automation Engineer", "IT",
-                    "Contractual", "9876543210", newEmail, dateOfJoining,
-                    dob, VALID_EMPLOYEE_PASSWORD, fullName, "Example Bank",
-                    "EXMP0001234", "1234567890", "ABCDE1234F");
+                addEmployeePage.fillEmployeeForm(
+                        firstName, lastName, "Automation Engineer", "IT",
+                        employeeType, "9876543210", newEmail, dateOfJoining,
+                        dob, VALID_EMPLOYEE_PASSWORD, fullName, "Example Bank",
+                        "EXMP0001234", "123456789" + (i + 1), "ABCDE123" + (4 + i) + (char) ('F' + i));
 
-            addEmployeeTest.log(Status.INFO, "Filled employee form with valid dynamic data");
+                addEmployeePage.submitForm();
 
+                try {
+                    WebDriverWait dialogWait = new WebDriverWait(driver, Duration.ofSeconds(15));
+                    dialogWait.until(driver -> {
+                        var dialogs = driver.findElements(By.cssSelector("div[role='dialog']"));
+                        if (dialogs.isEmpty()) return true;
+                        for (WebElement d : dialogs) {
+                            if (!d.isDisplayed()) return true;
+                            if ("closed".equals(d.getAttribute("data-state"))) return true;
+                        }
+                        return false;
+                    });
+                } catch (Exception e) {
+                    // continue to next type
+                }
 
-            // Submit the form
-            addEmployeePage.submitForm();
-
-            // No success message on Stage; wait for Add Employee popup to close (up to 15 s) if it does
-            try {
-                WebDriverWait dialogWait = new WebDriverWait(driver, Duration.ofSeconds(15));
-                dialogWait.until(driver -> {
-                    var dialogs = driver.findElements(By.cssSelector("div[role='dialog']"));
-                    if (dialogs.isEmpty()) return true;
-                    for (WebElement d : dialogs) {
-                        if (!d.isDisplayed()) return true;
-                        if ("closed".equals(d.getAttribute("data-state"))) return true;
-                    }
-                    return false;
-                });
-                addEmployeeTest.log(Status.PASS, "Employee form submitted and popup closed");
-            } catch (Exception e) {
-                addEmployeeTest.log(Status.WARNING, "Popup did not close within 15s; form was still submitted.");
-                addEmployeeTest.log(Status.PASS, "Employee form submitted.");
+                try { Thread.sleep(1500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             }
+
+            addEmployeeTest.log(Status.PASS, "All employee types added: Full time, Intern, Contractual, Consultant");
         } catch (Exception e) {
-            addEmployeeTest.log(Status.FAIL, "Failed to add employee: " + e.getMessage());
-            addEmployeeTest.log(Status.INFO, "Current URL at failure: " + driver.getCurrentUrl());
-            throw new RuntimeException("Failed to add employee: " + e.getMessage());
+            addEmployeeTest.log(Status.FAIL, "Failed to add employees: " + e.getMessage());
+            throw new RuntimeException("Failed to add employees: " + e.getMessage());
         }
     }
 }
