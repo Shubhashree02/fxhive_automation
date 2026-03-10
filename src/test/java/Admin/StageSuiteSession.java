@@ -76,15 +76,13 @@ public class StageSuiteSession {
 
     public static void ensureOnDashboard() {
         WebDriver d = getDriver();
-        d.get(DASHBOARD_URL);
+        d.get(TestConfig.getDashboardUrl());
         try {
             Thread.sleep(1500);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            url = d.getCurrentUrl();
-        } catch (Exception ignored) {
-            // ignore
         }
+        String url = d.getCurrentUrl();
         if (url == null || !url.contains("dashboard")) {
             d.get(TestConfig.getDashboardUrl());
         }

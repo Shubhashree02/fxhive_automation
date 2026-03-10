@@ -1,147 +1,19 @@
 package AdminPage;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
-import java.util.List;
 
 /**
- * Page object for Add Salary - Intern flow.
- * Flow: Salary Structure menu → Intern → Add New Salary → enter data → Save.
+ * Page object for Salary Structure → Intern → Add New Salary.
+ * Mirrors Generate Payroll POM: one page per type, base holds shared logic.
  */
-public class AddSalaryIntern {
-    WebDriver driver;
-    WebDriverWait wait;
+public class AddSalaryIntern extends AddSalaryBase {
 
     public AddSalaryIntern(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        super(driver);
     }
 
-    // Page navigation locators
-    private By salaryStructureMenu = By.xpath("//span[text()='Salary Structure']");
-    // Intern link: same pattern as Full Time, href for intern
-    private By internOption = By.cssSelector("a[href='/admin/salary-structure?type=intern']");
-    private By addNewSalaryBtn = By.cssSelector("button[title='Add New Salary']");
-
-    // Modal locators (same as Full Time)
-    private By employeeDropdownTrigger = By.id("employeeSelect");
-    private By employeeDropdownOptions = By.cssSelector("[role='option']");
-    private By grossInput = By.id("gross");
-    private By basicPayDisplay = By.id("basicPayDisplay");
-    private By hraDisplay = By.id("hraDisplay");
-    private By specialAllowanceDisplay = By.id("specialAllowanceDisplay");
-    private By taxInput = By.id("projectedIncomeTaxInput");
-    // Save: <button type="submit" class="... bg-primary text-primary-foreground ..." disabled="">Save</button> (Cancel is type="button")
-    private By saveButton = By.cssSelector("form button[type='submit']");
-
-    public void clickSalaryStructureMenu() {
-        wait.until(ExpectedConditions.elementToBeClickable(salaryStructureMenu)).click();
-    }
-
-    public void clickInternOption() {
-        wait.until(ExpectedConditions.elementToBeClickable(internOption)).click();
-    }
-
-    public void clickAddNewSalaryBtn() {
-        WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(addNewSalaryBtn));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", btn);
-        try {
-            btn.click();
-        } catch (Exception e) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
-        }
-        // Wait for modal: either #employeeSelect or button[role='combobox'] (app may use different markup for Intern)
-        WebDriverWait modalWait = new WebDriverWait(driver, Duration.ofSeconds(25));
-        modalWait.until(d -> {
-            if (!d.findElements(employeeDropdownTrigger).isEmpty() && d.findElement(employeeDropdownTrigger).isDisplayed()) return true;
-            return d.findElements(By.cssSelector("button[role='combobox']")).stream().anyMatch(WebElement::isDisplayed);
-        });
-        WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(15));
-        try {
-            shortWait.until(ExpectedConditions.visibilityOfElementLocated(grossInput));
-        } catch (org.openqa.selenium.TimeoutException e) {
-            // Intern form may show gross after employee selected
-        }
-    }
-
-    public void selectEmployeeByIndex(int index) {
-        By employeeTrigger = getEmployeeTriggerLocator();
-        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeTrigger));
-        trigger.click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(employeeDropdownOptions));
-        List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(employeeDropdownOptions));
-        if (index >= 0 && index < options.size()) {
-            options.get(index).click();
-        } else {
-            throw new IllegalArgumentException("Employee option index " + index + " out of range (0-" + (options.size() - 1) + ")");
-        }
-    }
-
-    private By getEmployeeTriggerLocator() {
-        if (!driver.findElements(employeeDropdownTrigger).isEmpty() && driver.findElement(employeeDropdownTrigger).isDisplayed()) {
-            return employeeDropdownTrigger;
-        }
-        return By.cssSelector("button[role='combobox']");
-    }
-
-    public void enterGross(String grossAmount) {
-        WebElement gross = wait.until(ExpectedConditions.visibilityOfElementLocated(grossInput));
-        gross.clear();
-        gross.sendKeys(grossAmount);
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    public void verifySalaryComponents(int gross) {
-        int basic = gross * 40 / 100;
-        int hra = basic * 40 / 100;
-        int special = gross - (basic + hra);
-
-        String rawBasic = driver.findElement(basicPayDisplay).getAttribute("value");
-        String rawHra = driver.findElement(hraDisplay).getAttribute("value");
-        String rawSpecial = driver.findElement(specialAllowanceDisplay).getAttribute("value");
-        int actualBasic = Integer.parseInt(rawBasic.replaceAll("[^0-9.-]", "").split("\\.")[0]);
-        int actualHra = Integer.parseInt(rawHra.replaceAll("[^0-9.-]", "").split("\\.")[0]);
-        int actualSpecial = Integer.parseInt(rawSpecial.replaceAll("[^0-9.-]", "").split("\\.")[0]);
-
-        assert actualBasic == basic : "Basic pay mismatch: expected " + basic + ", found " + actualBasic;
-        assert actualHra == hra : "HRA mismatch: expected " + hra + ", found " + actualHra;
-        assert actualSpecial == special : "Special allowance mismatch: expected " + special + ", found " + actualSpecial;
-    }
-
-    public void verifyTaxCalculation(int basic, int hra, int special) {
-        int annualIncome = (basic + hra + special - 75000) * 12;
-        int tax = annualIncome > 1200000 ? (annualIncome - 1200000) : 0;
-
-        String taxValue = driver.findElement(taxInput).getAttribute("value");
-        int actualTax = Integer.parseInt(taxValue.replaceAll("[^0-9.-]", "").split("\\.")[0]);
-
-        assert actualTax == tax : "Tax calculation mismatch: expected " + tax + ", found " + actualTax;
-    }
-
-    public void clickSave() {
-        try {
-            WebElement saveButtonElement = wait.until(ExpectedConditions.elementToBeClickable(saveButton));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", saveButtonElement);
-            saveButtonElement.click();
-            System.out.println("Clicked the Save button (Intern).");
-        } catch (Exception e) {
-            System.out.println("Error clicking the Save button: " + e.getMessage());
-            try {
-                WebElement saveButtonElement = driver.findElement(saveButton);
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButtonElement);
-                System.out.println("Clicked the Save button with JavaScript.");
-            } catch (Exception ex) {
-                throw new RuntimeException("Failed to click Save: " + ex.getMessage());
-            }
-        }
+    @Override
+    protected String getTypeSegment() {
+        return "intern";
     }
 }

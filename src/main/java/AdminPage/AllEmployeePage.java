@@ -3,9 +3,12 @@ package AdminPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class AllEmployeePage {
-    private WebDriver driver;
+    private final WebDriver driver;
+    private final WebDriverWait wait;
 
     // Locators
     private By employeeSearchInput = By.id("employeeSearchInput");
@@ -17,32 +20,35 @@ public class AllEmployeePage {
 
     public AllEmployeePage(WebDriver driver) {
         this.driver = driver;
+        this.wait = PageHelper.newPageWait(driver);
     }
 
     // Methods to interact with the elements
     public void searchEmployee(String keyword) {
-        WebElement searchInput = driver.findElement(employeeSearchInput);
+        WebElement searchInput = wait.until(ExpectedConditions.visibilityOfElementLocated(employeeSearchInput));
         searchInput.clear();
         searchInput.sendKeys(keyword);
-        driver.findElement(searchButton).click();
+        WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(searchButton));
+        PageHelper.scrollAndClick(driver, wait, btn);
     }
 
     public void selectEmployeeType(String type) {
-        WebElement typeFilter = driver.findElement(employeeTypeFilter);
+        WebElement typeFilter = wait.until(ExpectedConditions.visibilityOfElementLocated(employeeTypeFilter));
         typeFilter.sendKeys(type);
     }
 
     public void selectDepartment(String department) {
-        WebElement deptFilter = driver.findElement(departmentFilter);
+        WebElement deptFilter = wait.until(ExpectedConditions.visibilityOfElementLocated(departmentFilter));
         deptFilter.sendKeys(department);
     }
 
     public void selectStatus(String statusValue) {
-        WebElement statusFilterElement = driver.findElement(statusFilter);
+        WebElement statusFilterElement = wait.until(ExpectedConditions.visibilityOfElementLocated(statusFilter));
         statusFilterElement.sendKeys(statusValue);
     }
 
     public void resetFilters() {
-        driver.findElement(resetFiltersBtn).click();
+        WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(resetFiltersBtn));
+        PageHelper.scrollAndClick(driver, wait, btn);
     }
 }

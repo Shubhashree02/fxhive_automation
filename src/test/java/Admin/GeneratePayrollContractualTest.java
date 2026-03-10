@@ -1,6 +1,6 @@
 package Admin;
 
-import AdminPage.GeneratePayrollFullTime;
+import AdminPage.GeneratePayrollContractual;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -27,7 +27,7 @@ public class GeneratePayrollContractualTest {
     @Test
     public void testGeneratePayrollContractualFlow() {
         StageSuiteSession.ensureOnDashboard();
-        GeneratePayrollFullTime payrollPage = new GeneratePayrollFullTime(driver);
+        GeneratePayrollContractual payrollPage = new GeneratePayrollContractual(driver);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
         // Step 1: Click Payroll menu, then Contractual
