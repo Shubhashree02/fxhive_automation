@@ -9,6 +9,9 @@
   Example - run only CompanyProfileTest:
     <class name="Admin.StageSuiteSession"/>
     <class name="Admin.CompanyProfileTest"/>
+  Example - run only SettingsTest:
+    <class name="Admin.StageSuiteSession"/>
+    <class name="Admin.SettingsTest"/>
 -->
 <suite name="FxHive Test Suite" preserve-order="true">
     <test name="FxHive Admin Tests">
@@ -24,7 +27,8 @@
             <class name="Admin.GeneratePayrollContractualTest"/>
             <class name="Admin.GeneratePayrollConsultantTest"/>
             <class name="Admin.EmployeeDocumentTest"/>
-            <class name="Admin.CompanyProfileTest"/> -->
+            <class name="Admin.CompanyProfileTest"/>
+            <class name="Admin.SettingsTest"/> -->
             <!-- <class name="Admin.AllEmployeeTest"/> -->
         </classes>
     </test>
