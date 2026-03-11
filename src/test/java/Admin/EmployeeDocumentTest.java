@@ -35,8 +35,8 @@ public class EmployeeDocumentTest {
         docPage.clickEmployeeDocumentMenu();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("employee-document-select")));
 
-        // Step 2: Select employee (2nd position in dropdown, index 1)
-        docPage.selectEmployeeByIndex(1);
+        // Step 2: Select a random employee from the dropdown
+        docPage.selectRandomEmployee();
 
         // Step 3: Click Upload Document (opens modal) - wait for button to become enabled
         try { Thread.sleep(2000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }

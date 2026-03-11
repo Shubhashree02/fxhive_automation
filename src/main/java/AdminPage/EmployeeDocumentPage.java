@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Page object for Employee Document flow.
@@ -55,6 +56,35 @@ public class EmployeeDocumentPage {
             options.get(index).click();
         } else {
             throw new IllegalArgumentException("Employee option index " + index + " out of range (0-" + (options.size() - 1) + ")");
+        }
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /** Select a random employee from the dropdown. */
+    public void selectRandomEmployee() {
+        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeSelectTrigger));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", trigger);
+        try {
+            trigger.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", trigger);
+        }
+        wait.until(ExpectedConditions.visibilityOfElementLocated(optionRole));
+        List<WebElement> options = driver.findElements(optionRole);
+        if (options.isEmpty()) {
+            throw new IllegalStateException("No employee options in dropdown");
+        }
+        int index = new Random().nextInt(options.size());
+        WebElement option = options.get(index);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", option);
+        try {
+            option.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
         }
         try {
             Thread.sleep(500);
