@@ -14,6 +14,7 @@
             <class name="Admin.GeneratePayrollContractualTest"/>
             <class name="Admin.GeneratePayrollConsultantTest"/>
             <class name="Admin.EmployeeDocumentTest"/>
+            <class name="Admin.CompanyProfileTest"/>
             <!-- <class name="Admin.AllEmployeeTest"/> -->
         </classes>
     </test>

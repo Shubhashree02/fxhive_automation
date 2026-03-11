@@ -40,6 +40,7 @@ public class EmployeeDocumentTest {
         docPage.clickEmployeeDocumentMenu();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("employee-document-select")));
 
+        // Step 2: Select a random employee from the dropdown
         // Step 2: Select a random employee from the dropdown (different index each run)
         docPage.selectRandomEmployee();
 
