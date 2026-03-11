@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+  Single testng.xml for all tests.
+  - Full suite: keep all <class> below uncommented.
+  - Run one test only: comment out all <class> except StageSuiteSession and the one test you want.
+    Example: to run only Settings, leave uncommented just StageSuiteSession and SettingsTest, comment the rest.
+-->
 <suite name="FxHive Test Suite" preserve-order="true">
     <test name="FxHive Admin Tests">
         <classes>
@@ -15,9 +21,18 @@
             <class name="Admin.GeneratePayrollConsultantTest"/>
             <class name="Admin.EmployeeDocumentTest"/>
             <class name="Admin.CompanyProfileTest"/>
+            <class name="Admin.SettingsTest"/>
             <!-- <class name="Admin.AllEmployeeTest"/> -->
         </classes>
     </test>
+    <!-- EXAMPLE: To run ONLY Settings test, use the block below and comment the one above:
+    <test name="FxHive Admin Tests">
+        <classes>
+            <class name="Admin.StageSuiteSession"/>
+            <class name="Admin.SettingsTest"/>
+        </classes>
+    </test>
+    -->
     <!-- <test name="Salary Structure Tests - Full Time">
         <parameter name="employeeType" value="fulltime"/>
         <classes>
