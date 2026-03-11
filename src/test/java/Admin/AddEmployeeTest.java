@@ -53,7 +53,7 @@ public class AddEmployeeTest {
         com.aventstack.extentreports.ExtentTest addEmployeeTest =
                 StageSuiteSession.createNode("Add Employee Test - Add All Types");
         AddEmployeePage addEmployeePage = new AddEmployeePage(driver);
-        Faker faker = new Faker();
+        Faker faker = new Faker(new Locale("en", "IN"));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH);
         LocalDate today = LocalDate.now();
         LocalDate joiningDate = today.minusDays(30);
