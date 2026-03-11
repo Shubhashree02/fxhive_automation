@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
         <selenium.version>4.25.0</selenium.version>
         <testng.version>7.10.2</testng.version>
         <extentreports.version>5.1.2</extentreports.version>
@@ -78,7 +79,7 @@
                 <version>3.5.2</version>
                 <configuration>
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
                     <properties>
                         <property>
@@ -90,4 +91,12 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>document</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-document.xml</suiteXmlFile>
+            </properties>
+        </profile>
+    </profiles>
 </project>

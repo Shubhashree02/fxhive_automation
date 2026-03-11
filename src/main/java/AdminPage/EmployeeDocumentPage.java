@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Page object for Employee Document flow.
@@ -53,7 +54,7 @@ public class EmployeeDocumentPage {
         wait.until(ExpectedConditions.visibilityOfElementLocated(optionRole));
         List<WebElement> options = driver.findElements(optionRole);
         if (index >= 0 && index < options.size()) {
-            options.get(index).click();
+            clickOption(options.get(index));
         } else {
             throw new IllegalArgumentException("Employee option index " + index + " out of range (0-" + (options.size() - 1) + ")");
         }
@@ -73,6 +74,13 @@ public class EmployeeDocumentPage {
         } catch (Exception e) {
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", trigger);
         }
+    /**
+     * Select a random employee from the dropdown (different index each run).
+     * Uses index in range [0, optionCount - 1]. If only one option exists, selects it.
+     */
+    public void selectRandomEmployee() {
+        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeSelectTrigger));
+        trigger.click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(optionRole));
         List<WebElement> options = driver.findElements(optionRole);
         if (options.isEmpty()) {
@@ -86,6 +94,9 @@ public class EmployeeDocumentPage {
         } catch (Exception e) {
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
         }
+        int count = options.size();
+        int index = count == 1 ? 0 : ThreadLocalRandom.current().nextInt(count);
+        clickOption(options.get(index));
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -94,6 +105,17 @@ public class EmployeeDocumentPage {
     }
 
     /** Click the main "Upload Document" button (opens modal). Waits for button to become enabled after employee selection. */
+    private void clickOption(WebElement option) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", option);
+        try {
+            option.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
+        }
+    }
+
+    /**
+     * Click the main "Upload Document" button (opens modal). Waits for button to become enabled after employee selection. */
     public void clickUploadDocumentButton() {
         WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(45));
         WebElement btn = longWait.until(ExpectedConditions.elementToBeClickable(uploadDocumentButton));
@@ -142,6 +164,11 @@ public class EmployeeDocumentPage {
     public void uploadFile(String absoluteFilePath) {
         WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(fileInput));
         input.sendKeys(absoluteFilePath);
+        try {
+            Thread.sleep(800);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /** Click the Upload button in the modal to submit. */
