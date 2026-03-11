@@ -98,5 +98,11 @@
                 <suiteXmlFile>src/test/resources/testng-document.xml</suiteXmlFile>
             </properties>
         </profile>
+        <profile>
+            <id>company-profile</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-company-profile.xml</suiteXmlFile>
+            </properties>
+        </profile>
     </profiles>
 </project>

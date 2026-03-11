@@ -9,7 +9,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -65,7 +64,7 @@ public class EmployeeDocumentPage {
         }
     }
 
-    /** Select a random employee from the dropdown. */
+    /** Select a random employee from the dropdown (different index each run). */
     public void selectRandomEmployee() {
         WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeSelectTrigger));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", trigger);
@@ -74,25 +73,10 @@ public class EmployeeDocumentPage {
         } catch (Exception e) {
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", trigger);
         }
-    /**
-     * Select a random employee from the dropdown (different index each run).
-     * Uses index in range [0, optionCount - 1]. If only one option exists, selects it.
-     */
-    public void selectRandomEmployee() {
-        WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(employeeSelectTrigger));
-        trigger.click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(optionRole));
         List<WebElement> options = driver.findElements(optionRole);
         if (options.isEmpty()) {
             throw new IllegalStateException("No employee options in dropdown");
-        }
-        int index = new Random().nextInt(options.size());
-        WebElement option = options.get(index);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", option);
-        try {
-            option.click();
-        } catch (Exception e) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
         }
         int count = options.size();
         int index = count == 1 ? 0 : ThreadLocalRandom.current().nextInt(count);
@@ -104,7 +88,7 @@ public class EmployeeDocumentPage {
         }
     }
 
-    /** Click the main "Upload Document" button (opens modal). Waits for button to become enabled after employee selection. */
+    /** Click an option in the dropdown (scroll + click with JS fallback). */
     private void clickOption(WebElement option) {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", option);
         try {
