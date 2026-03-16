@@ -2,6 +2,7 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <!--
   Always use this file for test runs (mvn test).
+  Run only ONE test suite at a time (one "mvn test" or one IDE run) so only one Chrome window opens.
   To run only one test: comment out all classes below except StageSuiteSession and the test you want.
   Example - run only EmployeeDocumentTest:
     <class name="Admin.StageSuiteSession"/>
@@ -12,13 +13,14 @@
   Example - run only SettingsTest:
     <class name="Admin.StageSuiteSession"/>
     <class name="Admin.SettingsTest"/>
+  AllEmployeeTest is excluded (add <class name="Admin.AllEmployeeTest"/> to run it when fixed).
 -->
 <suite name="FxHive Test Suite" preserve-order="true">
     <test name="FxHive Admin Tests">
         <classes>
             <class name="Admin.StageSuiteSession"/>
             <class name="Admin.AddEmployeeTest"/>
-            <!-- <class name="Admin.AddSalaryFullTimeTest"/>
+            <class name="Admin.AddSalaryFullTimeTest"/>
             <class name="Admin.AddSalaryInternTest"/>
             <class name="Admin.AddSalaryContractualTest"/>
             <class name="Admin.AddSalaryConsultantTest"/>
@@ -28,8 +30,7 @@
             <class name="Admin.GeneratePayrollConsultantTest"/>
             <class name="Admin.EmployeeDocumentTest"/>
             <class name="Admin.CompanyProfileTest"/>
-            <class name="Admin.SettingsTest"/> -->
-            <!-- <class name="Admin.AllEmployeeTest"/> -->
+            <class name="Admin.SettingsTest"/>
         </classes>
     </test>
     <!-- <test name="Salary Structure Tests - Full Time">

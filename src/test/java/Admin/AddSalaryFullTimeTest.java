@@ -4,13 +4,16 @@ import AdminPage.AddSalaryFullTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
+
 import java.time.Duration;
+import java.util.List;
 
 public class AddSalaryFullTimeTest {
     private WebDriver driver;
@@ -33,11 +36,18 @@ public class AddSalaryFullTimeTest {
 
         // Step 2: Click on 'Full Time' option
         addSalaryPage.clickFullTimeOption();
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[title='Add New Salary']")));
+        WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        longWait.until(d -> {
+            if (!d.findElements(By.cssSelector("button[title='Add New Salary']")).isEmpty()
+                && d.findElement(By.cssSelector("button[title='Add New Salary']")).isDisplayed()
+                && d.findElement(By.cssSelector("button[title='Add New Salary']")).isEnabled()) return true;
+            List<WebElement> btns = d.findElements(By.xpath("//button[contains(.,'Add New Salary') or contains(.,'Add new salary')]"));
+            return btns.stream().anyMatch(WebElement::isDisplayed);
+        });
 
-        // Step 3: Click on 'Add New Salary' button
+        // Step 3: Click on 'Add New Salary' button (page object uses same fallbacks)
         addSalaryPage.clickAddNewSalaryBtn();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("employeeSelect")));
+        longWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("employeeSelect")));
 
         // Step 4–5: Fill details (select employee, enter gross)
         addSalaryPage.selectEmployeeByIndex(0);
@@ -50,8 +60,8 @@ public class AddSalaryFullTimeTest {
         int special = gross - (basic + hra);
         addSalaryPage.verifySalaryComponents(gross);
         addSalaryPage.verifyTaxCalculation(basic, hra, special);
-        // Click Save button
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("form button[type='submit']")));
+        // Click Save (waits for button in dialog to be enabled)
+        longWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[role='dialog']")));
         addSalaryPage.clickSave();
 
         // Optional: Pause for manual inspection (remove this in production)

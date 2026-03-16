@@ -11,6 +11,7 @@ public class AllEmployeePage {
     private final WebDriverWait wait;
 
     // Locators
+    private By employeeSidebarLink = By.cssSelector("a[href='/admin/employees']");
     private By employeeSearchInput = By.id("employeeSearchInput");
     private By searchButton = By.id("searchButton");
     private By employeeTypeFilter = By.id("employeeTypeFilter");
@@ -21,6 +22,13 @@ public class AllEmployeePage {
     public AllEmployeePage(WebDriver driver) {
         this.driver = driver;
         this.wait = PageHelper.newPageWait(driver);
+    }
+
+    /** Navigate to the Employees list page (required before search/filter). */
+    public void openEmployeesPage() {
+        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(employeeSidebarLink));
+        link.click();
+        wait.until(ExpectedConditions.urlContains("/admin/employees"));
     }
 
     // Methods to interact with the elements

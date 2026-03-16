@@ -20,6 +20,7 @@ public class AllEmployeeTest {
     public void testSearchEmployee() {
         StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
+        employeePage.openEmployeesPage();
         employeePage.searchEmployee("Shruti Mehta");
         // Add assertions to verify the search results
         Assert.assertTrue(driver.getPageSource().contains("Shruti Mehta"), "Employee not found");
@@ -29,6 +30,7 @@ public class AllEmployeeTest {
     public void testFilterByEmployeeType() {
         StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
+        employeePage.openEmployeesPage();
         employeePage.selectEmployeeType("Full time");
         // Add assertions to verify the filter results
         Assert.assertTrue(driver.getPageSource().contains("Full time"), "Filter not applied correctly");
@@ -38,6 +40,7 @@ public class AllEmployeeTest {
     public void testFilterByDepartment() {
         StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
+        employeePage.openEmployeesPage();
         employeePage.selectDepartment("HR");
         // Add assertions to verify the filter results
         Assert.assertTrue(driver.getPageSource().contains("HR"), "Filter not applied correctly");
@@ -47,6 +50,7 @@ public class AllEmployeeTest {
     public void testFilterByStatus() {
         StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
+        employeePage.openEmployeesPage();
         employeePage.selectStatus("Active");
         // Add assertions to verify the filter results
         Assert.assertTrue(driver.getPageSource().contains("Active"), "Filter not applied correctly");
@@ -56,6 +60,7 @@ public class AllEmployeeTest {
     public void testResetFilters() {
         StageSuiteSession.ensureOnDashboard();
         employeePage = new AllEmployeePage(driver);
+        employeePage.openEmployeesPage();
         employeePage.selectEmployeeType("Intern");
         employeePage.selectDepartment("Tech");
         employeePage.selectStatus("Inactive");

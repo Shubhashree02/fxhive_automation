@@ -4,6 +4,7 @@ import AdminPage.AddSalaryConsultant;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -37,19 +38,25 @@ public class AddSalaryConsultantTest {
 
         // Step 2: Click on 'Consultant' option
         addSalaryPage.clickConsultantOption();
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[title='Add New Salary']")));
+        WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        longWait.until(d -> {
+            if (!d.findElements(By.cssSelector("button[title='Add New Salary']")).isEmpty()
+                && d.findElement(By.cssSelector("button[title='Add New Salary']")).isDisplayed()
+                && d.findElement(By.cssSelector("button[title='Add New Salary']")).isEnabled()) return true;
+            return d.findElements(By.xpath("//button[contains(.,'Add New Salary') or contains(.,'Add new salary')]")).stream()
+                .anyMatch(WebElement::isDisplayed);
+        });
 
-        // Step 3: Click on 'Add New Salary' button
+        // Step 3: Click on 'Add New Salary' button (page object uses same fallbacks)
         addSalaryPage.clickAddNewSalaryBtn();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("employeeSelect")));
 
         // Step 4–5: Fill details (select employee, consultancy fee, TDS %)
         addSalaryPage.selectEmployeeByIndex(0);
         addSalaryPage.enterConsultancyFee("75000");
         addSalaryPage.enterTdsPercentage("10");
 
-        // Step 6: Click Save button
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("form button[type='submit']")));
+        // Step 6: Click Save (waits for button in dialog to be enabled)
+        longWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[role='dialog']")));
         addSalaryPage.clickSave();
 
         try {

@@ -10,13 +10,13 @@ import java.time.Duration;
 
 /**
  * Page object for Salary Structure → Consultant → Add New Salary.
- * Mirrors Generate Payroll POM: one page per type; base holds shared logic.
- * Consultant form uses consultancy fee and TDS %, not gross.
+ * Consultant form uses consultancy fee and TDS %, not gross. Adds dialog/form wait.
  */
 public class AddSalaryConsultant extends AddSalaryBase {
 
     private static final By consultancyFeeInput = By.id("consultancyFee");
     private static final By tdsPercentageInput = By.id("tdsPercentage");
+    private static final int MODAL_STABILIZE_MS = 600;
 
     public AddSalaryConsultant(WebDriver driver) {
         super(driver);
@@ -25,6 +25,25 @@ public class AddSalaryConsultant extends AddSalaryBase {
     @Override
     protected String getTypeSegment() {
         return "consultant";
+    }
+
+    @Override
+    public void clickAddNewSalaryBtn() {
+        super.clickAddNewSalaryBtn();
+        WebDriverWait dialogWait = new WebDriverWait(driver, Duration.ofSeconds(12));
+        dialogWait.until(d -> {
+            if (!d.findElements(By.cssSelector("[role='dialog']")).isEmpty() && d.findElement(By.cssSelector("[role='dialog']")).isDisplayed()) return true;
+            if (!d.findElements(By.cssSelector(".modal, [data-state='open']")).isEmpty()) return true;
+            return false;
+        });
+        try { Thread.sleep(MODAL_STABILIZE_MS); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        WebDriverWait formWait = new WebDriverWait(driver, Duration.ofSeconds(8));
+        formWait.until(d -> {
+            if (!d.findElements(By.id("employeeSelect")).isEmpty() && d.findElement(By.id("employeeSelect")).isDisplayed()) return true;
+            if (d.findElements(By.cssSelector("button[role='combobox']")).stream().anyMatch(WebElement::isDisplayed)) return true;
+            if (!d.findElements(consultancyFeeInput).isEmpty() && d.findElement(consultancyFeeInput).isDisplayed()) return true;
+            return false;
+        });
     }
 
     public void enterConsultancyFee(String amount) {

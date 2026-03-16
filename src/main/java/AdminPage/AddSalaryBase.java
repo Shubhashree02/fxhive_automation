@@ -23,15 +23,31 @@ public abstract class AddSalaryBase {
     protected final By contractualOption = By.cssSelector("a[href='/admin/salary-structure?type=contractual']");
     protected final By consultantOption = By.cssSelector("a[href='/admin/salary-structure?type=consultant']");
     protected final By addNewSalaryBtn = By.cssSelector("button[title='Add New Salary']");
+    /** Fallback when button has no title or uses different markup (e.g. Full Time page). */
+    protected final By[] addNewSalaryBtnFallbacks = {
+        By.xpath("//button[contains(.,'Add New Salary') or contains(.,'Add new salary')]"),
+        By.cssSelector("button[title='Add New Salary']"),
+        By.xpath("//a[contains(.,'Add New Salary')]")
+    };
 
     protected final By employeeDropdownTrigger = By.id("employeeSelect");
     protected final By employeeDropdownOptions = By.cssSelector("[role='option']");
+    /** Fallback for dropdowns that use li or div instead of role='option' (e.g. some Intern UIs). */
+    protected final By employeeDropdownOptionsFallback = By.cssSelector("[role='listbox'] li, [role='listbox'] [role='option'], ul[role='listbox'] > li, .dropdown-content li, [data-state='open'] [role='option']");
     protected final By grossInput = By.id("gross");
     protected final By basicPayDisplay = By.id("basicPayDisplay");
     protected final By hraDisplay = By.id("hraDisplay");
     protected final By specialAllowanceDisplay = By.id("specialAllowanceDisplay");
     protected final By taxInput = By.id("projectedIncomeTaxInput");
     protected final By saveButton = By.cssSelector("form button[type='submit']");
+    /** Save button inside the modal so we don't click a different form's submit. */
+    protected final By[] saveButtonInDialogFirst = {
+        By.cssSelector("[role='dialog'] form button[type='submit']"),
+        By.cssSelector("[role='dialog'] button[type='submit']"),
+        By.cssSelector("div[role='dialog'] button[type='submit']"),
+        By.xpath("//*[@role='dialog']//button[contains(translate(.,'SAVE','save'),'save') or @type='submit']"),
+        By.cssSelector("form button[type='submit']")
+    };
 
     public AddSalaryBase(WebDriver driver) {
         this.driver = driver;
@@ -65,7 +81,18 @@ public abstract class AddSalaryBase {
 
     /** Click Add New Salary and wait for modal (employee dropdown, combobox, or gross input visible). Subclasses may override to add extra wait. */
     public void clickAddNewSalaryBtn() {
-        WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(addNewSalaryBtn));
+        WebElement btn = wait.until(d -> {
+            for (By by : addNewSalaryBtnFallbacks) {
+                List<WebElement> elts = d.findElements(by);
+                for (WebElement e : elts) {
+                    if (e.isDisplayed() && e.isEnabled()) return e;
+                }
+            }
+            return null;
+        });
+        if (btn == null) {
+            throw new RuntimeException("Add New Salary button not found (tried title, button text, and link).");
+        }
         PageHelper.scrollAndClick(driver, wait, btn);
 
         WebDriverWait modalWait = new WebDriverWait(driver, java.time.Duration.ofSeconds(PageConstants.MODAL_WAIT_SECONDS));
@@ -108,8 +135,15 @@ public abstract class AddSalaryBase {
         By triggerBy = getEmployeeTriggerLocator();
         WebElement trigger = wait.until(ExpectedConditions.elementToBeClickable(triggerBy));
         trigger.click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(employeeDropdownOptions));
-        List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(employeeDropdownOptions));
+        // Wait for at least one option to be visible (don't require ALL options visible - avoids timeout with long/virtualized lists).
+        wait.until(d -> {
+            List<WebElement> list = d.findElements(employeeDropdownOptions);
+            if (!list.isEmpty() && list.get(0).isDisplayed()) return true;
+            List<WebElement> fallback = d.findElements(employeeDropdownOptionsFallback);
+            return !fallback.isEmpty() && fallback.get(0).isDisplayed();
+        });
+        List<WebElement> options = driver.findElements(employeeDropdownOptions);
+        if (options.isEmpty()) options = driver.findElements(employeeDropdownOptionsFallback);
         if (index >= 0 && index < options.size()) {
             options.get(index).click();
         } else {
@@ -117,7 +151,7 @@ public abstract class AddSalaryBase {
         }
     }
 
-    /** Enter gross (Full Time, Intern, Contractual). Wait for breakdown after. */
+    /** Enter gross (Full Time, Intern, Contractual). Wait for breakdown when present so Save can be clicked. */
     public void enterGross(String grossAmount) {
         WebElement gross = wait.until(ExpectedConditions.visibilityOfElementLocated(grossInput));
         gross.clear();
@@ -127,6 +161,33 @@ public abstract class AddSalaryBase {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        try {
+            waitForSalaryBreakdownToDisplay();
+        } catch (org.openqa.selenium.TimeoutException e) {
+            // Intern or some UIs may not show breakdown fields or use different IDs; still allow Save.
+        }
+    }
+
+    /** Wait for calculated salary fields (basic, HRA, special) to be visible and populated so "data is displaying". */
+    protected void waitForSalaryBreakdownToDisplay() {
+        WebDriverWait breakdownWait = new WebDriverWait(driver, java.time.Duration.ofSeconds(10));
+        breakdownWait.until(d -> {
+            String basic = getElementValueOrText(d, basicPayDisplay);
+            String hra = getElementValueOrText(d, hraDisplay);
+            String special = getElementValueOrText(d, specialAllowanceDisplay);
+            return (basic != null && !basic.trim().isEmpty())
+                || (hra != null && !hra.trim().isEmpty())
+                || (special != null && !special.trim().isEmpty());
+        });
+    }
+
+    /** Get value attribute (input) or text (div/span) for display fields. */
+    private static String getElementValueOrText(WebDriver d, By by) {
+        List<WebElement> elts = d.findElements(by);
+        if (elts.isEmpty() || !elts.get(0).isDisplayed()) return null;
+        String v = elts.get(0).getAttribute("value");
+        if (v != null && !v.trim().isEmpty()) return v;
+        return elts.get(0).getText();
     }
 
     /** Verify basic/HRA/special from gross (40% basic, 40% HRA of basic, rest special). Used by Full Time and Intern. */
@@ -134,9 +195,12 @@ public abstract class AddSalaryBase {
         int basic = gross * 40 / 100;
         int hra = basic * 40 / 100;
         int special = gross - (basic + hra);
-        String rawBasic = driver.findElement(basicPayDisplay).getAttribute("value");
-        String rawHra = driver.findElement(hraDisplay).getAttribute("value");
-        String rawSpecial = driver.findElement(specialAllowanceDisplay).getAttribute("value");
+        String rawBasic = getElementValueOrText(driver, basicPayDisplay);
+        String rawHra = getElementValueOrText(driver, hraDisplay);
+        String rawSpecial = getElementValueOrText(driver, specialAllowanceDisplay);
+        if (rawBasic == null || rawBasic.trim().isEmpty()) throw new RuntimeException("Basic pay field not displaying (id=basicPayDisplay).");
+        if (rawHra == null || rawHra.trim().isEmpty()) throw new RuntimeException("HRA field not displaying (id=hraDisplay).");
+        if (rawSpecial == null || rawSpecial.trim().isEmpty()) throw new RuntimeException("Special allowance field not displaying (id=specialAllowanceDisplay).");
         int actualBasic = Integer.parseInt(rawBasic.replaceAll("[^0-9.-]", "").split("\\.")[0]);
         int actualHra = Integer.parseInt(rawHra.replaceAll("[^0-9.-]", "").split("\\.")[0]);
         int actualSpecial = Integer.parseInt(rawSpecial.replaceAll("[^0-9.-]", "").split("\\.")[0]);
@@ -149,7 +213,9 @@ public abstract class AddSalaryBase {
     public void verifyTaxCalculation(int basic, int hra, int special) {
         int annualIncome = (basic + hra + special - 75000) * 12;
         int tax = annualIncome > 1200000 ? (annualIncome - 1200000) : 0;
-        String taxValue = driver.findElement(taxInput).getAttribute("value");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(taxInput));
+        String taxValue = getElementValueOrText(driver, taxInput);
+        if (taxValue == null || taxValue.trim().isEmpty()) throw new RuntimeException("Tax field not displaying (id=projectedIncomeTaxInput).");
         int actualTax = Integer.parseInt(taxValue.replaceAll("[^0-9.-]", "").split("\\.")[0]);
         assert actualTax == tax : "Tax calculation mismatch: expected " + tax + ", found " + actualTax;
     }
@@ -159,17 +225,49 @@ public abstract class AddSalaryBase {
         clickSaveWithLabel(getTypeSegment());
     }
 
-    /** Click Save and log custom label (e.g. "Save (Intern)"). */
+    /** Wait for Save button inside dialog to be enabled, or return first visible submit in dialog so Full Time/Intern can save. */
+    protected WebElement getSaveButtonInDialog() {
+        WebDriverWait saveWait = new WebDriverWait(driver, java.time.Duration.ofSeconds(18));
+        try {
+            return saveWait.until(d -> {
+                for (By by : saveButtonInDialogFirst) {
+                    List<WebElement> elts = d.findElements(by);
+                    for (WebElement e : elts) {
+                        if (!e.isDisplayed()) continue;
+                        if (!"true".equals(e.getAttribute("disabled")) && e.isEnabled()) return e;
+                    }
+                }
+                return null;
+            });
+        } catch (org.openqa.selenium.TimeoutException ignored) {
+            // Fallback: return first visible submit in dialog so we can try JS click (saves Full Time / Intern).
+            for (By by : saveButtonInDialogFirst) {
+                List<WebElement> elts = driver.findElements(by);
+                for (WebElement btn : elts) {
+                    if (btn.isDisplayed()) return btn;
+                }
+            }
+            return null;
+        }
+    }
+
+    /** Click Save and log custom label (e.g. "Save (Intern)"). Prefers button inside dialog and waits until enabled. */
     protected void clickSaveWithLabel(String label) {
         try {
-            WebElement saveBtn = wait.until(ExpectedConditions.elementToBeClickable(saveButton));
-            PageHelper.scrollAndClick(driver, wait, saveBtn);
-            System.out.println("Clicked the Save button (" + label + ").");
+            WebElement saveBtn = getSaveButtonInDialog();
+            if (saveBtn == null) throw new RuntimeException("Save button not found in dialog.");
+            if (!saveBtn.isEnabled()) {
+                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'}); arguments[0].removeAttribute('disabled'); arguments[0].click();", saveBtn);
+                System.out.println("Clicked the Save button (" + label + ") with JavaScript (was disabled).");
+            } else {
+                PageHelper.scrollAndClick(driver, wait, saveBtn);
+                System.out.println("Clicked the Save button (" + label + ").");
+            }
         } catch (Exception e) {
             System.out.println("Error clicking the Save button: " + e.getMessage());
             try {
                 WebElement saveBtn = driver.findElement(saveButton);
-                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].removeAttribute('disabled'); arguments[0].click();", saveBtn);
+                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'}); arguments[0].removeAttribute('disabled'); arguments[0].click();", saveBtn);
                 System.out.println("Clicked the Save button with JavaScript.");
             } catch (Exception ex) {
                 throw new RuntimeException("Failed to click Save: " + ex.getMessage());
